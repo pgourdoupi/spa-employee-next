@@ -9,9 +9,13 @@ import moment from 'moment';
 import {useRouter} from 'next/router';
 const FormItem = Form.Item;
 
- async function getServerSideProps(context) {
+ export async function getServerSideProps(context) {
     try {
-        const res = await fetch(`http://localhost:3000/employees/${context.params.id}`, {method: 'GET'});
+        const res = await fetch(`http://localhost:3000/api/getEmployeeById`, {method: 'POST',
+            body: JSON.stringify({
+                id: context.params.id
+            })
+        })
         const data = await res.json();
         if(!data)
             return {
@@ -26,28 +30,32 @@ const FormItem = Form.Item;
     }
 }
 
-
 export default function update(props) {
     const router = useRouter();
 
-    const data = props.data;
-    console.log("ta data einai", data)
-    const [body, setBody] = useState({Last:data.last_name, First:data.first_name, Act:data.is_active, Date:data.date_of_birth});
-    const dateFormat = 'yyyy/mm/dd';
+    const data = props.data[0];
+
+    const [Last, setLast] = useState(data.last_name);
+    const [First, setFirst] = useState(data.first_name);
+    const [Act, setAct] = useState(data.is_active);
+    const [date, setDate] = useState(data.date_of_birth);
+    const [id] = useState(data.id);
+    const dateFormat = 'YYYY/MM/DD';
 
 
-    async function updateEmployee(props){
+    async function updateEmployee(){
         try{
-            const res = await fetch(`http://localhost:3000/api/editEmployee/${props.id}`, {method: 'PUT',
+            const res = await fetch(`http://localhost:3000/api/editEmployee`, {method: 'PUT',
                 headers:{
                     'Accept':'application/json',
                     'Content-type':'application/json'
                 },
                 body: JSON.stringify({
-                    last_name:props.Last,
-                    first_name:props.First,
-                    is_active:props.Act,
-                    date_of_birth:props.Date
+                    last_name:Last,
+                    first_name:First,
+                    is_active:data.is_active,
+                    date_of_birth:date,
+                    id:id
                 })
             });
             router.push("/employees/listEmployees")
@@ -56,12 +64,11 @@ export default function update(props) {
         }
     }
 
-
     function changeActivity(value) {
-        setBody({...body,Act:value});
+        setAct({...Act,Act:value});
     }
     function changeDate(date, dateString) {
-        setBody({...body,Date:dateString});
+        setDate({...date,Date:dateString});
     }
     return (
         <Layout>
@@ -88,23 +95,23 @@ export default function update(props) {
                     <div className="site-layout-content">
                         <Form labelCol={{ span: 2 }} wrapperCol={{ span: 10 }} layout="horizontal">
                             <Form.Item label="Επώνυμο">
-                                <Input defaultValue ={data.last_name} onChange={(e)=>setBody({...body,Last:e.target.value})}/>
+                                <Input defaultValue ={Last} onChange={(e)=>setLast(e.target.value)}/>
                             </Form.Item>
                             <Form.Item label="Όνομα">
-                                <Input defaultValue ={data.first_name} onChange={(e)=>setBody({...body,First:e.target.value})}/>
+                                <Input defaultValue ={First} onChange={(e)=>setFirst(e.target.value)}/>
                             </Form.Item>
                             <Form.Item label="Κατάσταση">
-                                <Select defaultValue={data.is_active} onChange={changeActivity}>
-                                    <Option value="true" >Ενεργός</Option>
+                                <Select defaultValue={`${Act}`} onChange={changeActivity}>
+                                    <Option value="true">Ενεργός</Option>
                                     <Option value="false">Ανενεργός</Option>
                                 </Select>
                             </Form.Item>
                             <Form.Item label="Ημ/νια Γεν">
-                                <DatePicker defaultValue={moment(data.date_of_birth, dateFormat)} format={dateFormat} onChange={changeDate} />
+                                <DatePicker defaultValue={moment(date)} format={dateFormat} onChange={changeDate}/>
                             </Form.Item>
                         </Form>
                     </div>
-                    <Button size="large" type="primary" disabled = {!body.Last||!body.First||!body.Act||!body.Date} onClick={()=>updateEmployee(body)}>
+                    <Button size="large" type="primary" disabled = {!Last||!First||!Act||!date} onClick={()=>updateEmployee()}>
                         Ενημέρωση
                     </Button>
                 </div>
