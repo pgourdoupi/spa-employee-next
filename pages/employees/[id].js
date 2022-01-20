@@ -1,31 +1,35 @@
-import { Form, Select, Input, Button, Layout, Menu, Breadcrumb, DatePicker } from 'antd';
+import {Form, Select, Input, Button, Layout, Menu, Breadcrumb, DatePicker} from 'antd';
 import Link from 'next/link';
 import {useState} from 'react';
 import Image from "next/image";
 import CoffeeLogo from "../../public/images/Coffee_Island_logo.jpg";
-const { Header, Footer, Content } = Layout;
+
+const {Header, Footer, Content} = Layout;
 const Option = Select.Option;
 import moment from 'moment';
 import {useRouter} from 'next/router';
+
 const FormItem = Form.Item;
 
- export async function getServerSideProps(context) {
+export async function getServerSideProps(context) {
     try {
-        const res = await fetch(`http://localhost:3000/api/getEmployeeById`, {method: 'POST',
+        const res = await fetch(`http://localhost:3000/api/getEmployeeById`, {
+            method: 'POST',
             body: JSON.stringify({
                 id: context.params.id
             })
         })
         const data = await res.json();
-        if(!data)
+        if (!data)
             return {
                 notFound: true,
             }
         return {
-            props:{
+            props: {
                 data,
             },
-        }}catch(e) {
+        }
+    } catch (e) {
         console.log(e)
     }
 }
@@ -35,40 +39,37 @@ export default function update(props) {
 
     const data = props.data[0];
 
-    const [last, setLast] = useState(data.last_name);
-    const [first, setFirst] = useState(data.first_name);
-    const [act, setAct] = useState(data.is_active);
-    const [date, setDate] = useState(data.date_of_birth);
-    const [id] = useState(data.id);
+    const [employee, setEmployee] = useState({
+        last_name: data.last_name,
+        first_name: data.first_name,
+        is_active: data.is_active,
+        date_of_birth: data.date_of_birth,
+        id: data.id
+    })
+
     const dateFormat = 'YYYY/MM/DD';
 
 
-    async function updateEmployee(){
-        try{
-            const res = await fetch(`http://localhost:3000/api/editEmployee`, {method: 'PUT',
-                headers:{
-                    'Accept':'application/json',
-                    'Content-type':'application/json'
+    async function updateEmployee() {
+        try {
+            const res = await fetch(`http://localhost:3000/api/editEmployee`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-type': 'application/json'
                 },
                 body: JSON.stringify({
-                    last_name:last,
-                    first_name:first,
-                    is_active:data.is_active,
-                    date_of_birth:date,
-                    id:id
+                    last_name: employee.last_name,
+                    first_name: employee.first_name,
+                    is_active: employee.is_active,
+                    date_of_birth: employee.date_of_birth,
+                    id: employee.id
                 })
             });
             router.push("/employees/listEmployees")
-        }catch(e){
+        } catch (e) {
             console.log(e)
         }
-    }
-
-    function changeActivity(value) {
-        setAct({...act,Act:value});
-    }
-    function changeDate(date, dateString) {
-        setDate({...date,Date:dateString});
     }
     return (
         <Layout>
@@ -91,27 +92,28 @@ export default function update(props) {
             </Header>
             <Content className="site-layout" style={{padding: '0 50px', marginTop: 50}}>
                 <div className="site-layout-background" style={{padding: 100, minHeight: 100}}>
-                    <Breadcrumb style={{ margin: '16px 0' }}/>
+                    <Breadcrumb style={{margin: '16px 0'}}/>
                     <div className="site-layout-content">
-                        <Form labelCol={{ span: 2 }} wrapperCol={{ span: 10 }} layout="horizontal">
+                        <Form labelCol={{span: 2}} wrapperCol={{span: 10}} layout="horizontal">
                             <Form.Item label="Επώνυμο">
-                                <Input defaultValue ={last} onChange={(e)=>setLast(e.target.value)}/>
+                                <Input defaultValue={employee.last_name} onChange={(e) => setEmployee({...employee, last_name: e.target.value})}/>
                             </Form.Item>
                             <Form.Item label="Όνομα">
-                                <Input defaultValue ={first} onChange={(e)=>setFirst(e.target.value)}/>
+                                <Input defaultValue={employee.first_name} onChange={(e) => setEmployee({...employee, first_name: e.target.value})}/>
                             </Form.Item>
                             <Form.Item label="Κατάσταση">
-                                <Select defaultValue={`${act}`} onChange={changeActivity}>
+                                <Select defaultValue={`${employee.is_active}`} onChange={(employeeState) => setEmployee({...employee, is_active: employeeState})}>
                                     <Option value="true">Ενεργός</Option>
                                     <Option value="false">Ανενεργός</Option>
                                 </Select>
                             </Form.Item>
                             <Form.Item label="Ημ/νια Γεν">
-                                <DatePicker defaultValue={moment(date)} format={dateFormat} onChange={changeDate}/>
+                                <DatePicker defaultValue={moment(employee.date_of_birth)} format={dateFormat} onChange={(employeeDate) => setEmployee({...employee, date_of_birth: employeeDate})}/>
                             </Form.Item>
                         </Form>
                     </div>
-                    <Button size="large" type="primary" disabled = {!last||!first||!act||!date} onClick={()=>updateEmployee()}>
+                    <Button size="large" type="primary" disabled={!employee.last_name || !employee.first_name || !employee.is_active || !employee.date_of_birth}
+                            onClick={() => updateEmployee()}>
                         Ενημέρωση
                     </Button>
                 </div>
