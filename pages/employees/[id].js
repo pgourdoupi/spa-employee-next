@@ -35,9 +35,9 @@ export default function update(props) {
 
     const data = props.data[0];
 
-    const [Last, setLast] = useState(data.last_name);
-    const [First, setFirst] = useState(data.first_name);
-    const [Act, setAct] = useState(data.is_active);
+    const [last, setLast] = useState(data.last_name);
+    const [first, setFirst] = useState(data.first_name);
+    const [act, setAct] = useState(data.is_active);
     const [date, setDate] = useState(data.date_of_birth);
     const [id] = useState(data.id);
     const dateFormat = 'YYYY/MM/DD';
@@ -51,8 +51,8 @@ export default function update(props) {
                     'Content-type':'application/json'
                 },
                 body: JSON.stringify({
-                    last_name:Last,
-                    first_name:First,
+                    last_name:last,
+                    first_name:first,
                     is_active:data.is_active,
                     date_of_birth:date,
                     id:id
@@ -65,7 +65,7 @@ export default function update(props) {
     }
 
     function changeActivity(value) {
-        setAct({...Act,Act:value});
+        setAct({...act,Act:value});
     }
     function changeDate(date, dateString) {
         setDate({...date,Date:dateString});
@@ -95,13 +95,13 @@ export default function update(props) {
                     <div className="site-layout-content">
                         <Form labelCol={{ span: 2 }} wrapperCol={{ span: 10 }} layout="horizontal">
                             <Form.Item label="Επώνυμο">
-                                <Input defaultValue ={Last} onChange={(e)=>setLast(e.target.value)}/>
+                                <Input defaultValue ={last} onChange={(e)=>setLast(e.target.value)}/>
                             </Form.Item>
                             <Form.Item label="Όνομα">
-                                <Input defaultValue ={First} onChange={(e)=>setFirst(e.target.value)}/>
+                                <Input defaultValue ={first} onChange={(e)=>setFirst(e.target.value)}/>
                             </Form.Item>
                             <Form.Item label="Κατάσταση">
-                                <Select defaultValue={`${Act}`} onChange={changeActivity}>
+                                <Select defaultValue={`${act}`} onChange={changeActivity}>
                                     <Option value="true">Ενεργός</Option>
                                     <Option value="false">Ανενεργός</Option>
                                 </Select>
@@ -111,7 +111,7 @@ export default function update(props) {
                             </Form.Item>
                         </Form>
                     </div>
-                    <Button size="large" type="primary" disabled = {!Last||!First||!Act||!date} onClick={()=>updateEmployee()}>
+                    <Button size="large" type="primary" disabled = {!last||!first||!act||!date} onClick={()=>updateEmployee()}>
                         Ενημέρωση
                     </Button>
                 </div>
